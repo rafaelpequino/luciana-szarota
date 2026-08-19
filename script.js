@@ -92,7 +92,29 @@ form.addEventListener('submit', e => {
   window.location.href = waUrl(message);
 });
 
-document.querySelectorAll('details').forEach(detail => detail.addEventListener('toggle', () => { if (detail.open) track('faq_open', { question: detail.querySelector('summary').textContent.replace('+','').trim() }); }));
+function animateDetail(detail, shouldOpen) {
+  if (detail.dataset.animating === 'true') return;
+  detail.dataset.animating = 'true';
+  const summary = detail.querySelector('summary');
+  const startHeight = detail.offsetHeight;
+  if (shouldOpen) detail.open = true;
+  const endHeight = shouldOpen ? detail.scrollHeight : summary.offsetHeight;
+  const animation = detail.animate({ height: [`${startHeight}px`, `${endHeight}px`] }, { duration: 300, easing: 'ease-in-out' });
+  animation.onfinish = () => {
+    if (!shouldOpen) detail.open = false;
+    detail.style.height = '';
+    delete detail.dataset.animating;
+  };
+}
+document.querySelectorAll('.accordion details').forEach(detail => {
+  detail.querySelector('summary').addEventListener('click', event => {
+    event.preventDefault();
+    const shouldOpen = !detail.open;
+    document.querySelectorAll('.accordion details[open]').forEach(other => { if (other !== detail) animateDetail(other, false); });
+    animateDetail(detail, shouldOpen);
+    if (shouldOpen) track('faq_open', { question: detail.querySelector('summary').textContent.replace('+','').trim() });
+  });
+});
 const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }), { threshold: .12 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 document.querySelector('#year').textContent = new Date().getFullYear();
