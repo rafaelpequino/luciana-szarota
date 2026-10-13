@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simulador de Consórcio | Luciana Szarota</title>
+    <meta
+      name="description"
+      content="Responda algumas perguntas rápidas e descubra a melhor opção de consórcio para o seu momento."
+    />
+    <meta name="theme-color" content="#06152f" />
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href="https://lucianaszarota.com.br/simulador" />
+    <link rel="stylesheet" href="/simulador/simulador.css" />
+  </head>
+  <body>
+    <div class="sim" id="sim">
+      <header class="sim-top">
+        <a class="sim-brand" href="/" aria-label="Voltar ao site">
+          <strong>Luciana Szarota</strong>
+          <span>Consultora de Consórcio Porto</span>
+        </a>
+        <button class="sim-back" id="btn-back" type="button" hidden>
+          &larr; Voltar
+        </button>
+      </header>
+
+      <div class="sim-progress" id="progress" hidden>
+        <div class="sim-progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="chips" id="chips" hidden></div>
+
+      <main class="sim-main" id="main">
+        <section class="screen is-active" id="screen-intro">
+          <h1>Descubra a melhor opção para o seu momento</h1>
+          <p class="lead">
+            Responda poucas perguntas, leva cerca de 1 minuto. Sem compromisso.
+          </p>
+          <button class="btn" id="btn-start" type="button">Começar</button>
+        </section>
+
+        <section class="screen" id="screen-question">
+          <p class="step-count" id="q-count"></p>
+          <h2 id="q-title"></h2>
+          <p class="lead" id="q-hint"></p>
+          <div class="options" id="q-options" role="radiogroup"></div>
+          <div class="range" id="q-range" hidden>
+            <output class="range-value" id="q-value" for="q-slider"></output>
+            <input type="range" id="q-slider" aria-labelledby="q-title" />
+            <div class="range-labels">
+              <span id="q-min"></span><span id="q-max"></span>
+            </div>
+            <p class="range-error" id="q-error" role="alert"></p>
+            <button class="btn" id="q-next" type="button">Continuar</button>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-contact">
+          <p class="step-count">Quase lá</p>
+          <h2>Sua simulação está pronta</h2>
+          <p class="lead">
+            Informe seus dados para ver o resultado. Usamos seu contato apenas
+            para enviar a simulação e tirar dúvidas.
+          </p>
+          <form class="form" id="contact-form" novalidate>
+            <label class="field">
+              <span>Nome</span>
+              <input
+                type="text"
+                name="nome"
+                autocomplete="name"
+                required
+                placeholder="Seu nome completo"
+              />
+              <small class="error" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>WhatsApp</span>
+              <input
+                type="tel"
+                name="telefone"
+                inputmode="tel"
+                autocomplete="tel"
+                required
+                placeholder="(11) 99999-9999"
+              />
+              <small class="error" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>E-mail</span>
+              <input
+                type="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="voce@email.com"
+              />
+              <small class="error" aria-live="polite"></small>
+            </label>
+            <label class="consent">
+              <input type="checkbox" name="consent" required />
+              <span
+                >Concordo em ser contatado(a) pela consultora sobre esta
+                simulação.</span
+              >
+            </label>
+            <button class="btn" id="btn-submit" type="submit" disabled>
+              Ver minha simulação
+            </button>
+          </form>
+        </section>
+
+        <section class="screen wide" id="screen-result">
+          <p class="step-count">Resultado da simulação</p>
+          <h2>
+            <span id="r-name">Olá</span>, veja como ficam as 3 formas de
+            conquistar <span id="r-item">o bem</span>
+          </h2>
+          <ul class="summary" id="r-summary"></ul>
+          <p class="savings" id="r-savings" hidden></p>
+          <div class="cmp" id="r-cards"></div>
+
+          <p class="disclaimer">
+            Simulação ilustrativa, baseada nas informações que você passou e em
+            taxas médias de mercado. Valores finais dependem de análise,
+            disponibilidade de grupos e condições vigentes. A consultora entrará
+            em contato para confirmar.
+          </p>
+          <a class="btn" id="r-whatsapp" href="#" rel="noopener"
+            >Falar com a Luciana no WhatsApp</a
+          >
+          <button class="btn btn-ghost" id="btn-redo" type="button">
+            Refazer a simulação
+          </button>
+        </section>
+      </main>
+    </div>
+    <script src="/simulador/simulador.js"></script>
+  </body>
+</html>
