@@ -646,9 +646,85 @@
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     if (!isValid()) return;
-    // TODO: enviar answers + contato (nome, telefone, email) ao backend/CRM.
     go(total + 1);
+    sendLead();
   });
+
+  // Envia o lead para o Google Apps Script (backend/lead-email.gs), que manda o e-mail
+  // e grava na planilha. Falhas não afetam o resultado mostrado ao usuário.
+  var LEAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbxnJAbQGhVzMy72LtfSeJxVSRPYux_r6_OYL8uLFZea3xu1KD6j_kniDo14-M970bFP/exec";
+  var leadSent = false;
+  function sendLead() {
+    if (leadSent || LEAD_ENDPOINT.indexOf("https://") !== 0) return;
+    leadSent = true;
+    var a = answers;
+    var item = ITEMS[a.objetivo];
+    var c = compute(a);
+    var saveMoney = c.fin ? c.fin.interest - c.cons.fee : 0;
+    var saveMonths = c.fin ? c.fin.months - c.cons.months : 0;
+    var economia = [];
+    if (saveMoney > 0) economia.push(brl(saveMoney));
+    if (saveMonths > 0) economia.push(saveMonths + " meses");
+    var vantagens = [];
+    if (saveMoney > 0) vantagens.push("Custo " + brl(saveMoney) + " menor que o do financiamento");
+    if (saveMonths > 0) vantagens.push("Prazo " + saveMonths + " meses menor que o do financiamento");
+    if (!vantagens.length) vantagens.push("Sem juros: você paga só a taxa administrativa");
+    var acima = "Neste prazo máximo, a parcela fica acima do orçamento";
+
+    var data = {
+      nome: form.nome.value.trim(),
+      telefone: form.telefone.value.trim(),
+      telefoneDigitos: phoneDigits(form.telefone.value),
+      email: form.email.value.trim(),
+      conquista: item.label,
+      valorLabel: item.valorLabel,
+      valor: brl(a.valor) + (a.valor === 5000000 ? "+" : ""),
+      parcelaDisponivel: brl(a.parcela) + (a.parcela === 10000 ? "+" : ""),
+      entrada: brl(a.entrada),
+      urgencia: a.urgencia,
+      decisao: a.decisao,
+      economia: economia.length ? "Com o consórcio você economiza " + economia.join(" e ") + " em comparação ao financiamento." : "",
+      vantagens: vantagens.join(" | "),
+      consorcio: {
+        quando: "Por sorteio ou lance",
+        entrada: brl(a.entrada),
+        parcela: brl(c.cons.pmt),
+        prazo: c.cons.months + " meses",
+        total: brl(c.cons.total),
+        taxa: brl(c.cons.fee) + " de taxa, sem juros",
+        alerta: c.cons.over ? acima : "",
+      },
+      financiamento: c.fin
+        ? {
+            tabela: "Tabela Price, juros de " + String(Math.round(c.fin.rate * 1000) / 10).replace(".", ",") + "% ao mês",
+            quando: "Em poucos dias",
+            entrada: brl(a.entrada),
+            parcela: brl(c.fin.pmt),
+            prazo: c.fin.months + " meses",
+            total: brl(c.fin.total),
+            juros: brl(c.fin.interest) + " em juros",
+            alerta: c.fin.over ? acima : "",
+          }
+        : null,
+      investimento: {
+        prazo: duration(c.own.months),
+        inicial: brl(a.entrada),
+        aporte: brl(Math.max(a.parcela, minMonthly(a))),
+        investido: brl(c.own.invested),
+        rendimento: brl(c.own.gain),
+        acumulado: brl(c.own.balance),
+      },
+    };
+    fetch(LEAD_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(data),
+      keepalive: true,
+    }).catch(function () {
+      leadSent = false;
+    });
+  }
 
   form.telefone.addEventListener("input", function (e) {
     var d = phoneDigits(e.target.value, e.inputType);
