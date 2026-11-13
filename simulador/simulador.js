@@ -652,7 +652,7 @@
 
   // Envia o lead para o Google Apps Script (backend/lead-email.gs), que manda o e-mail
   // e grava na planilha. Falhas não afetam o resultado mostrado ao usuário.
-  var LEAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbxnJAbQGhVzMy72LtfSeJxVSRPYux_r6_OYL8uLFZea3xu1KD6j_kniDo14-M970bFP/exec";
+  var LEAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDn2ldSJzc8OZQhsxfUpexJkigPOwL995Kb3GajfFVgUkQ-kwdsKq9qk9fn8fym4zWoQ/exec";
   var leadSent = false;
   function sendLead() {
     if (leadSent || LEAD_ENDPOINT.indexOf("https://") !== 0) return;
@@ -672,6 +672,7 @@
     var acima = "Neste prazo máximo, a parcela fica acima do orçamento";
 
     var data = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 10),
       nome: form.nome.value.trim(),
       telefone: form.telefone.value.trim(),
       telefoneDigitos: phoneDigits(form.telefone.value),

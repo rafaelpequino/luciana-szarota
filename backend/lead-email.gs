@@ -5,23 +5,38 @@
  * Instalação: veja backend/README.md
  */
 
-var DESTINATARIO = "o.rafaelpequino@gmail.com";
+var DESTINATARIO = "lucianaszarota1@gmail.com";
 var NOME_REMETENTE = "Simulador Luciana Szarota";
 // Alias "Enviar e-mail como" já confirmado no Gmail. Deixe vazio para enviar pelo Gmail padrão.
 var REMETENTE = "leads@rafaelpequino.com.br";
 
 function doPost(e) {
+  var lock = LockService.getScriptLock();
   try {
     var d = JSON.parse(e.postData.contents);
     if (!d || !d.nome || !d.telefoneDigitos || !d.email) {
       return resposta("invalido");
     }
+    // Serializa as requisições para que reenvios simultâneos do mesmo lead não passem juntos.
+    lock.waitLock(20000);
+    if (jaProcessado(d)) return resposta("duplicado");
     salvarNaPlanilha(d);
     enviarEmail(d);
     return resposta("ok");
   } catch (err) {
     return resposta("erro");
+  } finally {
+    try { lock.releaseLock(); } catch (e2) {}
   }
+}
+
+// Ignora o mesmo lead recebido mais de uma vez (reenvios do navegador ou da rede).
+function jaProcessado(d) {
+  var chave = "lead:" + (d.id || [d.email, d.telefoneDigitos, d.conquista, d.valor].join("|"));
+  var cache = CacheService.getScriptCache();
+  if (cache.get(chave)) return true;
+  cache.put(chave, "1", 600);
+  return false;
 }
 
 function resposta(status) {
